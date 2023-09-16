@@ -17,7 +17,9 @@ namespace FinalTask
             var receivedPathToFile = string.Empty;
             receivedPathToFile = GetPathToFile();
 
-            Console.WriteLine($"+++ {receivedPathToFile}");
+            ReadFile(receivedPathToFile);
+
+
         }
 
         private static string GetPathToFile()           //path not string
@@ -45,7 +47,7 @@ namespace FinalTask
             return receivedData;
         }
 
-        private static bool IsFileExist(in string dataToCheck)
+        private static bool IsFileExist(in string dataToCheck) 
         {
             if (!File.Exists(dataToCheck))
             {
@@ -59,7 +61,7 @@ namespace FinalTask
             }
         }
 
-        private static bool GetPathToFileNotNull(in string dataToCheck)
+        private static bool GetPathToFileNotNull(in string dataToCheck) 
         {
             if (string.IsNullOrWhiteSpace(dataToCheck))
             {
@@ -71,6 +73,16 @@ namespace FinalTask
             {
                 return true;
             }
+        }
+
+        private static void ReadFile(in string filePath)
+        {
+            var stringValue = string.Empty;
+            using (BinaryReader reader = new BinaryReader(File.Open(filePath, FileMode.Open)))
+            {
+                stringValue = reader.ReadString();
+            }
+            Console.WriteLine($"{stringValue}");
         }
     }
 
