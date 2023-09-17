@@ -1,4 +1,7 @@
-﻿using System;
+﻿// /Users/somovas/Downloads/Students.dat
+//
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -14,18 +17,16 @@ namespace FinalTask
 
             Console.WriteLine($"Please, input the path to file: ");
             receivedFilePath = GetPathToFile();
+            
+            Console.WriteLine($" !!!: {receivedFilePath}");
 
             try
             {
-                var studentsList = new List<Student>();
-
-                studentsList = ReadBinaryFile(receivedFilePath);
-                foreach (var student in studentsList)
-                {
-                    Console.WriteLine($"{student.StudentName}");
-                    Console.WriteLine($"{student.StudentGroup}");
-                    Console.WriteLine($"{student.BirthDate}");
-                }
+                Console.WriteLine($" !!!: {receivedFilePath}");
+                
+                List<Student> students;
+                ReadBinaryFile(receivedFilePath, out students);
+                ShowStudents(students);
             }
             catch
             {
@@ -50,10 +51,10 @@ namespace FinalTask
             return receivedData;
         }
 
-        private static string GetPathFromConsole() 
+        private static string GetPathFromConsole()                                  // Есть ли смысл создавать пустую строку до того как считываем введённый текст
         {
-            var receivedData = string.Empty;
-            receivedData = Path.GetFullPath(Console.ReadLine());
+            var receivedData = Console.ReadLine();
+            receivedData = Path.GetFullPath(receivedData);
 
             return receivedData;
         }
@@ -86,9 +87,9 @@ namespace FinalTask
             }
         }
 
-        private static List<Student> ReadBinaryFile(in string filePath)
+        private static void ReadBinaryFile(string filePath, out List<Student> students)
         {
-            List<Student> students = new List<Student>();
+            students = new List<Student>();
             using (BinaryReader reader = new BinaryReader(File.Open(filePath, FileMode.Open)))
             {
                 while (reader.PeekChar() > -1)
@@ -101,8 +102,17 @@ namespace FinalTask
                     Student student = new Student(studentName, studentGroup, birthDayDate);
                     students.Add(student);
                 }
-
-            return students;
+            }
+        }
+        
+        private static void ShowStudents(List<Student> students)
+        {
+            foreach (var student in students)
+            {
+                Console.WriteLine($"Student Name: {student.StudentName}");
+                Console.WriteLine($"Student Group: {student.StudentGroup}");
+                Console.WriteLine($"Birth Date: {student.BirthDate}");
+                Console.WriteLine();
             }
         }
     }
