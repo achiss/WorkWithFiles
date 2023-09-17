@@ -7,107 +7,83 @@ using System.IO;
 
 namespace FinalTask
 {
-
-    class MainClass 
+    class MainClass
     {
-
-        public static void Main(string[] args) 
+        public static void Main(string[] args)
         {
             var receivedFilePath = string.Empty;
 
-            Console.WriteLine($"Please, input the path to file: ");
+            Console.WriteLine("Please, input the path to file: ");
             receivedFilePath = GetPathToFile();
-            
-            Console.WriteLine($" !!!: {receivedFilePath}");
 
+            List<Student> studentsList;
             try
             {
-                Console.WriteLine($" !!!: {receivedFilePath}");
-                
-                List<Student> students;
-                ReadBinaryFile(receivedFilePath, out students);
-                ShowStudents(students);
+                studentsList = ReadBinaryFile(receivedFilePath);
+                ShowStudents(studentsList);
             }
-            catch
+            catch (Exception ex)
             {
-
+                Console.WriteLine("[ERROR] An error occurred while reading the file:");
+                Console.WriteLine(ex.Message);
             }
         }
 
-        private static string GetPathToFile()                                      // path not 'text (bla-bla-...)'
+        private static string GetPathToFile()
         {
             var receivedData = string.Empty;
-            receivedData = GetPathFromConsole();                                   //  Path.GetFullPath(targetPath)
+            receivedData = GetPathFromConsole();
 
-            bool CheckFileExist = IsFileExist(receivedData);                       //  File.Exists(targetPath)
-            bool CheckNullData = GetPathToFileNotNull(receivedData);               //  string.IsNullOrWhiteSpace(targetPath)
-
-            if ( (!CheckFileExist) && (CheckNullData) )
+            while (!IsFileValid(receivedData))
             {
-                Console.WriteLine($"[INFO] {receivedData}\n[INFO] Not correct data.\nRepeat input data one more time: ");
-                GetPathToFile();
+                Console.WriteLine("[INFO] Invalid file path. Please enter a valid path:");
+                receivedData = GetPathFromConsole();
             }
 
             return receivedData;
         }
 
-        private static string GetPathFromConsole()                                  // Есть ли смысл создавать пустую строку до того как считываем введённый текст
+        private static string GetPathFromConsole()
         {
-            var receivedData = Console.ReadLine();
-            receivedData = Path.GetFullPath(receivedData);
-
-            return receivedData;
+            return Path.GetFullPath(Console.ReadLine());
         }
 
-        private static bool IsFileExist(in string dataToCheck) 
+        private static bool IsFileValid(string filePath)
         {
-            if (!File.Exists(dataToCheck))
-            {
-                Console.WriteLine($"[INFO] It cann't to read the file using received path!");
-
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return ( !string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath) );
         }
-
-        private static bool GetPathToFileNotNull(in string dataToCheck) 
+ 
+        private static List<Student> ReadBinaryFile(string filePath)
         {
-            if (string.IsNullOrWhiteSpace(dataToCheck))
-            {
-                Console.WriteLine($"[INFO] Received path is null or contain something!");
-
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
-        private static void ReadBinaryFile(string filePath, out List<Student> students)
-        {
-            students = new List<Student>();
+            List<Student> studentsList = new List<Student>();
             using (BinaryReader reader = new BinaryReader(File.Open(filePath, FileMode.Open)))
             {
-                while (reader.PeekChar() > -1)
+                while (reader.BaseStream.Position < reader.BaseStream.Length)
                 {
                     string studentName = reader.ReadString();
                     string studentGroup = reader.ReadString();
-                    long birhDate = reader.ReadInt64();
-                    DateTime birthDayDate = new DateTime(birhDate);
+                    long birthDateTicks = reader.ReadInt64();
 
-                    Student student = new Student(studentName, studentGroup, birthDayDate);
-                    students.Add(student);
+                    if (birthDateTicks < DateTime.MinValue.Ticks || birthDateTicks > DateTime.MaxValue.Ticks)
+                    {
+                        // Обработка некорректного значения birthDateTicks.
+                        // Может быть сброс до значения по умолчанию или другая логика.
+                        // Например, можно пропустить запись студента в studentsList.
+                        continue;
+                    }
+
+                    DateTime birthDate = new DateTime(birthDateTicks);
+                    Student student = new Student(studentName, studentGroup, birthDate);
+                    studentsList.Add(student);
                 }
             }
+            return studentsList;
         }
-        
-        private static void ShowStudents(List<Student> students)
+
+
+        private static void ShowStudents(List<Student> studentsList)
         {
-            foreach (var student in students)
+            foreach (var student in studentsList)
             {
                 Console.WriteLine($"Student Name: {student.StudentName}");
                 Console.WriteLine($"Student Group: {student.StudentGroup}");
@@ -116,5 +92,4 @@ namespace FinalTask
             }
         }
     }
-
 }
