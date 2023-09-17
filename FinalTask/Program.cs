@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace FinalTask
@@ -6,29 +7,39 @@ namespace FinalTask
 
     class MainClass 
     {
-        private static string StudentName { get; set; }
-        private static string StudentGroup { get; set; }
-        private static DateTime BirthDate { get; set; }
 
         public static void Main(string[] args) 
         {
+            var receivedFilePath = string.Empty;
+
             Console.WriteLine($"Please, input the path to file: ");
+            receivedFilePath = GetPathToFile();
 
-            var receivedPathToFile = string.Empty;
-            receivedPathToFile = GetPathToFile();
+            try
+            {
+                var studentsList = new List<Student>();
 
-            ReadFile(receivedPathToFile);
+                studentsList = ReadBinaryFile(receivedFilePath);
+                foreach (var student in studentsList)
+                {
+                    Console.WriteLine($"{student.StudentName}");
+                    Console.WriteLine($"{student.StudentGroup}");
+                    Console.WriteLine($"{student.BirthDate}");
+                }
+            }
+            catch
+            {
 
-
+            }
         }
 
-        private static string GetPathToFile()           //path not string
+        private static string GetPathToFile()                                      // path not 'text (bla-bla-...)'
         {
             var receivedData = string.Empty;
-            receivedData = GetPathFromConsole();
+            receivedData = GetPathFromConsole();                                   //  Path.GetFullPath(targetPath)
 
-            bool CheckFileExist = IsFileExist(receivedData);
-            bool CheckNullData = GetPathToFileNotNull(receivedData);
+            bool CheckFileExist = IsFileExist(receivedData);                       //  File.Exists(targetPath)
+            bool CheckNullData = GetPathToFileNotNull(receivedData);               //  string.IsNullOrWhiteSpace(targetPath)
 
             if ( (!CheckFileExist) && (CheckNullData) )
             {
@@ -75,14 +86,24 @@ namespace FinalTask
             }
         }
 
-        private static void ReadFile(in string filePath)
+        private static List<Student> ReadBinaryFile(in string filePath)
         {
-            var stringValue = string.Empty;
+            List<Student> students = new List<Student>();
             using (BinaryReader reader = new BinaryReader(File.Open(filePath, FileMode.Open)))
             {
-                stringValue = reader.ReadString();
+                while (reader.PeekChar() > -1)
+                {
+                    string studentName = reader.ReadString();
+                    string studentGroup = reader.ReadString();
+                    long birhDate = reader.ReadInt64();
+                    DateTime birthDayDate = new DateTime(birhDate);
+
+                    Student student = new Student(studentName, studentGroup, birthDayDate);
+                    students.Add(student);
+                }
+
+            return students;
             }
-            Console.WriteLine($"{stringValue}");
         }
     }
 
