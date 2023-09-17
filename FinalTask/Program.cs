@@ -64,14 +64,6 @@ namespace FinalTask
                     string studentGroup = reader.ReadString();
                     long birthDateTicks = reader.ReadInt64();
 
-                    if (birthDateTicks < DateTime.MinValue.Ticks || birthDateTicks > DateTime.MaxValue.Ticks)
-                    {
-                        // Обработка некорректного значения birthDateTicks.
-                        // Может быть сброс до значения по умолчанию или другая логика.
-                        // Например, можно пропустить запись студента в studentsList.
-                        continue;
-                    }
-
                     DateTime birthDate = new DateTime(birthDateTicks);
                     Student student = new Student(studentName, studentGroup, birthDate);
                     studentsList.Add(student);
@@ -79,7 +71,6 @@ namespace FinalTask
             }
             return studentsList;
         }
-
 
         private static void ShowStudents(List<Student> studentsList)
         {
